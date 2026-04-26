@@ -97,25 +97,37 @@ form.addEventListener('submit', async (e) => {
     const data = Object.fromEntries(formData.entries());
     const age = parseInt(data.age);
 
-    // --- FORM VALIDATION ---
-    if (age < 0 || age > 100) {
-        alert('Please enter a realistic age (0 - 100).');
+    // --- REFINED FORM VALIDATION ---
+    if (age < 0 || age > 120) {
+        alert('Please enter a valid age between 0 and 120.');
         return;
     }
 
-    // Logical Consistency Checks
-    if (age > 40 && data.occupation === 'Student') {
-        alert('Age inconsistency: Student schemes are generally for age 40 and below.');
+    // 1. Retirement Age Check
+    if (age > 60 && data.occupation === 'Government Employee') {
+        alert('Age Inconsistency: In India, government employees generally retire by age 60. Please select "Unemployed" or "Self Employed" if you are a pensioner.');
         return;
     }
 
-    if (age < 15 && (data.education === 'Graduate' || data.education === 'Post Graduate')) {
-        alert('Age inconsistency: Education level not possible for this age.');
+    // 2. Student Age Check
+    if (age > 60 && data.occupation === 'Student') {
+        alert('Age Inconsistency: Most government student schemes are for those under 60. If you are a senior citizen, please select "Unemployed" or "Self Employed" to find relevant schemes.');
         return;
     }
 
-    if (age < 18 && data.occupation === 'Government Employee') {
-        alert('Age inconsistency: Government employment is generally for age 18 and above.');
+    // 3. Education Age Check
+    if (age < 18 && data.education === 'Graduate') {
+        alert('Age Inconsistency: Graduation is typically completed after age 18.');
+        return;
+    }
+    if (age < 20 && data.education === 'Post Graduate') {
+        alert('Age Inconsistency: Post-graduation is typically completed after age 20.');
+        return;
+    }
+
+    // 4. Child Labor Protection Check
+    if (age < 14 && (data.occupation === 'Farmer' || data.occupation === 'Private Employee' || data.occupation === 'Government Employee')) {
+        alert('Age Inconsistency: Official employment or independent farming is typically for age 14 and above.');
         return;
     }
 
