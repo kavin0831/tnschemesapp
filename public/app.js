@@ -95,6 +95,29 @@ form.addEventListener('submit', async (e) => {
     // Collect Data
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
+    const age = parseInt(data.age);
+
+    // --- FORM VALIDATION ---
+    if (age < 0 || age > 100) {
+        alert('Please enter a realistic age (0 - 100).');
+        return;
+    }
+
+    // Logical Consistency Checks
+    if (age > 40 && data.occupation === 'Student') {
+        alert('Age inconsistency: Student schemes are generally for age 40 and below.');
+        return;
+    }
+
+    if (age < 15 && (data.education === 'Graduate' || data.education === 'Post Graduate')) {
+        alert('Age inconsistency: Education level not possible for this age.');
+        return;
+    }
+
+    if (age < 18 && data.occupation === 'Government Employee') {
+        alert('Age inconsistency: Government employment is generally for age 18 and above.');
+        return;
+    }
 
     // UI Transitions
     formSection.classList.add('hidden');
