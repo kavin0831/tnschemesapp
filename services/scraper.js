@@ -101,25 +101,26 @@ async function getSchemeDetails(schemeUrl) {
 
 const multiStateScraper = require('./multiStateScraper');
 
+const fs = require('fs');
+const path = require('path');
+
 async function getAllSchemes() {
     try {
-        console.log('Fetching TN schemes via Python Stealth Proxy...');
-        const PYTHON_SCRAPE_URL = 'https://kavin08028292002-tnschemes.hf.space/scrape_tn';
+        console.log('Loading TN schemes from official local data...');
+        const dataPath = path.join(__dirname, '../tn_schemes_data.json');
         
-        const response = await axios.get(PYTHON_SCRAPE_URL, { timeout: 45000 });
-        
-        if (response.data && response.data.success && response.data.schemes.length > 0) {
-            console.log(`Successfully fetched ${response.data.count} TN schemes via Python.`);
-            return response.data.schemes;
+        if (fs.existsSync(dataPath)) {
+            const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+            console.log(`Successfully loaded ${data.length} official TN schemes from file.`);
+            return data;
         } else {
-            console.log('Python proxy failed or returned empty. Falling back to Wikipedia...');
+            console.log('Official data file not found, falling back to Wikipedia...');
             const multiStateScraper = require('./multiStateScraper');
             return await multiStateScraper.scrapeState('Tamil Nadu');
         }
     } catch (e) {
-        console.error('Error fetching TN schemes via proxy:', e.message);
-        const multiStateScraper = require('./multiStateScraper');
-        return await multiStateScraper.scrapeState('Tamil Nadu');
+        console.error('Error loading TN schemes:', e.message);
+        return [];
     }
 }
 
