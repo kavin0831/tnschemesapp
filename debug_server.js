@@ -18,7 +18,7 @@ preloadSchemes();
 const app = express();
 const PORT = 3001; // CHANGED PORT
 
-const SAMBANOVA_API_KEY = 'c7b1d0ce-36c7-421f-ab6a-5aeed86677e2';
+const SAMBANOVA_API_KEY = '2ddaa116-b04d-4a4b-bd99-f4467e611947';
 const SAMBANOVA_API_URL = 'https://api.sambanova.ai/v1/chat/completions';
 
 // --- CLERK CONFIGURATION ---

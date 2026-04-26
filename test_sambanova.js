@@ -1,7 +1,7 @@
 const https = require('https');
 
 // SambaNova API Configuration
-const API_KEY = 'c7b1d0ce-36c7-421f-ab6a-5aeed86677e2';
+const API_KEY = '2ddaa116-b04d-4a4b-bd99-f4467e611947';
 const API_URL = 'https://api.sambanova.ai/v1/chat/completions';
 
 // Test streaming with DeepSeek-V3.1

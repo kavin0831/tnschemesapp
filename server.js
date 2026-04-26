@@ -25,7 +25,7 @@ const app = express();
 const PORT = 3000;
 const PYTHON_AI_URL = 'https://kavin08028292002-tnschemes.hf.space/filter_and_score';
 
-const SAMBANOVA_API_KEY = 'c7b1d0ce-36c7-421f-ab6a-5aeed86677e2';
+const SAMBANOVA_API_KEY = '2ddaa116-b04d-4a4b-bd99-f4467e611947';
 const SAMBANOVA_API_URL = 'https://api.sambanova.ai/v1/chat/completions';
 
 app.use(cors());
