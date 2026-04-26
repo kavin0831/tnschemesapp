@@ -99,25 +99,28 @@ async function getSchemeDetails(schemeUrl) {
     }
 }
 
+const multiStateScraper = require('./multiStateScraper');
+
 async function getAllSchemes() {
     try {
-        console.log('Fetching TN schemes via Python Proxy (bypassing firewall)...');
+        console.log('Fetching TN schemes via Wikipedia (Reliable & Unblocked)...');
         
-        // We use the Python service because Vercel is blocked by tn.gov.in
-        const PYTHON_SCRAPE_URL = 'https://kavin08028292002-tnschemes.hf.space/scrape_tn';
+        // Using Wikipedia is much more reliable in production as gov portals block Vercel/HuggingFace
+        const schemes = await multiStateScraper.scrapeState('Tamil Nadu');
         
-        const response = await axios.get(PYTHON_SCRAPE_URL, { timeout: 30000 });
-        
-        if (response.data && response.data.success) {
-            console.log(`Successfully fetched ${response.data.count} schemes via Python.`);
-            return response.data.schemes;
+        if (schemes && schemes.length > 0) {
+            console.log(`Successfully fetched ${schemes.length} TN schemes from Wikipedia.`);
+            return schemes;
         } else {
-            console.log('Python proxy returned no schemes, trying local fallback...');
-            // Fallback to local scraping logic (might fail on Vercel but works locally)
-            return [{ title: "Official TN Schemes", url: "https://www.tn.gov.in/scheme_beneficiary_list.php?id=MTM=" }];
+            console.log('Wikipedia returned no schemes, trying basic fallback...');
+            return [
+                { title: "Dr. Muthulakshmi Reddy Maternity Benefit Scheme", url: "https://en.wikipedia.org/wiki/Welfare_schemes_in_Tamil_Nadu", source: "Wiki", type: "Govt", state: "Tamil Nadu" },
+                { title: "Amma Unavagam (Mother's Canteen)", url: "https://en.wikipedia.org/wiki/Amma_Unavagam", source: "Wiki", type: "Govt", state: "Tamil Nadu" },
+                { title: "Chief Minister's Comprehensive Health Insurance Scheme", url: "https://en.wikipedia.org/wiki/Chief_Minister's_Comprehensive_Health_Insurance_Scheme", source: "Wiki", type: "Govt", state: "Tamil Nadu" }
+            ];
         }
     } catch (e) {
-        console.error('Error fetching TN schemes via proxy:', e.message);
+        console.error('Error fetching TN schemes:', e.message);
         return [];
     }
 }
