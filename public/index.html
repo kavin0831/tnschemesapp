@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN Scheme Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script async crossorigin="anonymous"
+        data-clerk-publishable-key="pk_test_bm90ZWQteWV0aS05NC5jbGVyay5hY2NvdW50cy5kZXYk"
+        src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div id="clerk-auth-container" class="clerk-auth-container">
+        <!-- Clerk Sign-In component will be rendered here -->
+        <div id="sign-in"></div>
+    </div>
+
+    <div id="app-container" class="hidden">
+        <header>
+            <div class="logo-container">
+                <img src="https://www.tn.gov.in/sites/all/themes/bharat_gov/logo.png" alt="TN Emblem" class="emblem"
+                    onerror="this.style.display='none'">
+                <div class="header-text">
+                    <h1 data-i18n="title">TN Scheme Finder</h1>
+                    <p data-i18n="subtitle">Government Eligibility Verification Desk</p>
+                </div>
+                <div class="user-controls">
+                    <div id="google_translate_element"></div>
+                    <div id="user-button"></div>
+                </div>
+            </div>
+            <!-- NEW: Navigation Bar -->
+            <nav class="main-nav">
+                <button id="nav-home" class="nav-btn active">Eligibility Check</button>
+                <button id="nav-catalog" class="nav-btn">All Schemes Catalog 📚</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Eligibility Form -->
+            <section id="form-section" class="card">
+                <h2 data-i18n="find_schemes">Check Your Eligibility</h2>
+                <form id="eligibility-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="age" data-i18n="age">Age</label>
+                            <input type="number" id="age" name="age" required min="0" max="120" placeholder="e.g. 25">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender" data-i18n="gender">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="education">Education Level</label>
+                            <select id="education" name="education" required>
+                                <option value="">Select Education</option>
+                                <option value="School">School</option>
+                                <option value="College">College</option>
+                                <option value="Graduate">Graduate</option>
+                                <option value="Post Graduate">Post Graduate</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="occupation">Occupation</label>
+                            <select id="occupation" name="occupation" required>
+                                <option value="">Select Occupation</option>
+                                <option value="Student">Student</option>
+                                <option value="Farmer">Farmer</option>
+                                <option value="Private Employee">Private Employee</option>
+                                <option value="Government Employee">Government Employee</option>
+                                <option value="Self Employed">Self Employed</option>
+                                <option value="Unemployed">Unemployed</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="income">Annual Income</label>
+                            <select id="income" name="income" required>
+                                <option value="">Select Income</option>
+                                <option value="Below 1L">Below 1 Lakh</option>
+                                <option value="1-3L">1 - 3 Lakhs</option>
+                                <option value="3-5L">3 - 5 Lakhs</option>
+                                <option value="Above 5L">Above 5 Lakhs</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="community">Community</label>
+                            <select id="community" name="community" required>
+                                <option value="">Select Community</option>
+                                <option value="SC">SC</option>
+                                <option value="ST">ST</option>
+                                <option value="BC">BC</option>
+                                <option value="MBC">MBC</option>
+                                <option value="OC">OC / General</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="disability">Differently Abled?</label>
+                            <select id="disability" name="disability" required>
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fatherOccupation">Father's Occupation</label>
+                            <select id="fatherOccupation" name="fatherOccupation" required>
+                                <option value="">Select Occupation</option>
+                                <option value="Farmer">Farmer</option>
+                                <option value="Government Employee">Government Employee</option>
+                                <option value="Private Employee">Private Employee</option>
+                                <option value="Self Employed">Self Employed / Business</option>
+                                <option value="Handloom Weaver">Handloom Weaver</option>
+                                <option value="Ex-Serviceman">Ex-Serviceman</option>
+                                <option value="Deceased">Deceased / Not Applicable</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary" data-i18n="search_button">Find Eligible
+                            Schemes</button>
+                        <button type="reset" class="btn-secondary" data-i18n="no">Reset</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Loading State -->
+            <section id="loading-section" class="hidden">
+                <div class="loader"></div>
+                <p>Scanning Government Database...</p>
+                <small>Fetching live data from tn.gov.in</small>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results-section" class="hidden">
+                <div class="results-header">
+                    <h2>Eligible Schemes Found</h2>
+                    <button id="back-to-form" class="btn-text">← Modify Search</button>
+                </div>
+
+                <!-- DASHBOARD ANALYTICS -->
+                <div id="results-dashboard" class="dashboard-grid">
+                    <div class="dash-card result-summary">
+                        <div class="stat-main">
+                            <span id="total-count" class="stat-number">0</span>
+                            <span class="stat-label" data-i18n="total_eligible">Total Eligible Schemes</span>
+                        </div>
+                    </div>
+                    <div class="dash-card chart-container">
+                        <h3>Breakdown by Source</h3>
+                        <canvas id="sourceChart"></canvas>
+                    </div>
+                    <div class="dash-card chart-container">
+                        <h3>Match Quality</h3>
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                </div>
+
+                <div id="schemes-grid" class="schemes-grid">
+                    <!-- Cards will be injected here -->
+                </div>
+            </section>
+
+            <!-- NEW: Catalog Section -->
+            <section id="catalog-section" class="hidden">
+                <div class="catalog-layout">
+                    <!-- Sidebar Filters -->
+                    <aside class="catalog-sidebar">
+
+                        <!-- NEW: Section Tabs (Visual) -->
+                        <div class="catalog-tabs">
+                            <button class="tab-btn active" data-section="state">🏛️ TN State</button>
+                            <button class="tab-btn" data-section="central">🇮🇳 Central</button>
+                            <button class="tab-btn" data-section="private">🏢 Private</button>
+                        </div>
+
+                        <!-- NEW: State Dropdown (Visible only for Central) -->
+                        <div id="state-selector-container" class="filter-group hidden">
+                            <h3>Select State</h3>
+                            <select id="state-select">
+                                <option value="Central">All India (Central)</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                <option value="Assam">Assam</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Chhattisgarh">Chhattisgarh</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                <option value="Jharkhand">Jharkhand</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Manipur">Manipur</option>
+                                <option value="Meghalaya">Meghalaya</option>
+                                <option value="Mizoram">Mizoram</option>
+                                <option value="Nagaland">Nagaland</option>
+                                <option value="Odisha">Odisha</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Sikkim">Sikkim</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tripura">Tripura</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Uttarakhand">Uttarakhand</option>
+                                <option value="West Bengal">West Bengal</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <h3>Search</h3>
+                            <input type="text" id="catalog-search" placeholder="Search by name..." class="search-input">
+                        </div>
+
+                        <div class="filter-group">
+                            <h3>Beneficiaries</h3>
+                            <div class="checkbox-list" id="beneficiary-filters">
+                                <label><input type="checkbox" name="ben" value="STUDENTS"> Students</label>
+                                <label><input type="checkbox" name="ben" value="FARMERS"> Farmers</label>
+                                <label><input type="checkbox" name="ben" value="WOMEN"> Women</label>
+                                <label><input type="checkbox" name="ben" value="UNEMPLOYMENT"> Unemployed</label>
+                                <label><input type="checkbox" name="ben" value="SC_ST"> SC/ST</label>
+                                <label><input type="checkbox" name="ben" value="PENSIONS"> Senior/Pension</label>
+                                <label><input type="checkbox" name="ben" value="GENERAL"> General</label>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Main Grid -->
+                    <div class="catalog-main">
+                        <div class="catalog-header">
+                            <h2 id="catalog-count">Showing 0 Schemes</h2>
+                        </div>
+                        <div id="catalog-grid" class="schemes-grid">
+                            <!-- Catalog cards -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Details Modal -->
+            <div id="scheme-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2 id="modal-title">Scheme Title</h2>
+                    <div id="modal-body" class="modal-body">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Chat Modal -->
+            <div id="ai-chat-modal" class="modal hidden">
+                <div class="modal-content chat-modal">
+                    <span class="close-chat">&times;</span>
+                    <h2>💬 Expert Search Assistant</h2>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="ai-message">Hi! I can help you understand government schemes. You can ask me:
+                            <ul>
+                                <li>Which scheme is best for me?</li>
+                                <li>Compare two schemes</li>
+                                <li>Explain eligibility criteria</li>
+                                <li>How to apply for a scheme?</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Ask about schemes..." />
+                        <button id="chat-send" class="btn-primary">Send</button>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </main>
+
+        <footer>
+            <p>
+                <strong>Note:</strong> Schemes are fetched live from official <a href="https://www.tn.gov.in">Tamil Nadu
+                    Government websites</a>.
+                This platform does not prioritize any specific scheme and does not store user data.
+            </p>
+        </footer>
+
+    </div>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,ta,kn,te,ml,hi,gu,mr,bn,or,pa',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

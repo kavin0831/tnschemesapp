@@ -1,0 +1,6 @@
+node_modules
+.env
+python_ai
+*.png
+*.log
+indiagov_dump.html

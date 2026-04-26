@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puter.js AI Streaming Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #output {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            line-height: 1.8;
+            min-height: 200px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            color: #ffd700;
+            margin-top: 20px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffd700;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🤖 Puter.js AI Streaming Test</h1>
+    <div id="output">
+        <div class="loading"></div> Initializing AI stream...
+    </div>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        async function streamResponses() {
+            const outputDiv = document.getElementById('output');
+
+            try {
+                // Gemini 3 Flash with streaming
+                outputDiv.innerHTML = '<h2>📡 Gemini 3 Flash Response:</h2><p>';
+
+                const flashResponse = await puter.ai.chat(
+                    "Explain the process of photosynthesis in detail",
+                    {
+                        model: 'gemini-3-flash-preview',
+                        stream: true
+                    }
+                );
+
+                for await (const part of flashResponse) {
+                    if (part?.text) {
+                        outputDiv.innerHTML += part.text.replaceAll('\n', '<br>');
+                    }
+                }
+
+                outputDiv.innerHTML += '</p><hr><p style="color: #90EE90;">✅ Stream completed successfully!</p>';
+            } catch (error) {
+                outputDiv.innerHTML = `<h2>❌ Error:</h2><p style="color: #ff6b6b;">${error.message}</p>`;
+                console.error('Streaming error:', error);
+            }
+        }
+
+        // Start streaming when page loads
+        streamResponses();
+    </script>
+</body>
+
+</html>
