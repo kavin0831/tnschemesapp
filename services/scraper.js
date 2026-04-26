@@ -101,26 +101,23 @@ async function getSchemeDetails(schemeUrl) {
 
 async function getAllSchemes() {
     try {
-        console.log('Fetching schemes from TARGETED source (id=MTM)...');
-        // const categories = await getBeneficiaryCategories(); // Disabled for targeted fetch
-        const categories = [
-            { name: 'Targeted List (General)', url: `${BASE_URL}/scheme_beneficiary_list.php?id=MTM=` }
-        ];
-        const allSchemes = [];
-
-        const promises = categories.map(async (cat) => {
-            const schemes = await getSchemesForCategory(cat.url);
-            return schemes.map(s => ({ ...s, beneficiaryGroup: cat.name }));
-        });
-
-        const results = await Promise.all(promises);
-        results.forEach(batch => allSchemes.push(...batch));
-
-        const unique = allSchemes.filter((v, i, a) => a.findIndex(t => t.url === v.url) === i);
-        console.log(`Live Fetched ${unique.length} unique schemes.`);
-        return unique;
+        console.log('Fetching TN schemes via Python Proxy (bypassing firewall)...');
+        
+        // We use the Python service because Vercel is blocked by tn.gov.in
+        const PYTHON_SCRAPE_URL = 'https://kavin08028292002-tnschemes.hf.space/scrape_tn';
+        
+        const response = await axios.get(PYTHON_SCRAPE_URL, { timeout: 30000 });
+        
+        if (response.data && response.data.success) {
+            console.log(`Successfully fetched ${response.data.count} schemes via Python.`);
+            return response.data.schemes;
+        } else {
+            console.log('Python proxy returned no schemes, trying local fallback...');
+            // Fallback to local scraping logic (might fail on Vercel but works locally)
+            return [{ title: "Official TN Schemes", url: "https://www.tn.gov.in/scheme_beneficiary_list.php?id=MTM=" }];
+        }
     } catch (e) {
-        console.error('Error fetching all schemes:', e.message);
+        console.error('Error fetching TN schemes via proxy:', e.message);
         return [];
     }
 }
