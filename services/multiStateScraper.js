@@ -2,7 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const https = require('https');
 const crypto = require('crypto');
-const puppeteer = require('puppeteer'); // Core requirement now
+const puppeteer = require('puppeteer-core'); // Core requirement now
 
 const client = axios.create({
     httpsAgent: new https.Agent({
@@ -46,6 +46,7 @@ const STATE_PORTALS = {
     "Sikkim": "https://sikkim.gov.in/schemes",
     "Tamil Nadu": "https://en.wikipedia.org/wiki/Category:Government_welfare_schemes_in_Tamil_Nadu",
     "Telangana": "https://en.wikipedia.org/wiki/Category:Government_schemes_in_Telangana", // Switching to Wiki Category
+    "Tripura": "https://tripura.gov.in/scheme-view",
     "Tripura": "https://tripura.gov.in/scheme-view",
     "Uttar Pradesh": "https://en.wikipedia.org/wiki/Category:Government_schemes_in_Uttar_Pradesh",
     "Uttarakhand": "https://uk.gov.in/pages/display/117-schemes",
@@ -157,10 +158,22 @@ async function scrapeDynamicState(stateName, url) {
     console.log(`[MultiState-Dynamic] Launching Browser for ${stateName}...`);
     let browser = null;
     try {
-        browser = await puppeteer.launch({
-            headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu']
-        });
+        if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+            const chromium = require('@sparticuz/chromium');
+            browser = await puppeteer.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: chromium.headless,
+                ignoreHTTPSErrors: true,
+            });
+        } else {
+            const localPuppeteer = require('puppeteer');
+            browser = await localPuppeteer.launch({
+                headless: 'new',
+                args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu']
+            });
+        }
         const page = await browser.newPage();
 
         // Block heavy resources

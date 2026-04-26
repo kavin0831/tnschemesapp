@@ -3,7 +3,7 @@
  * Targets rules.myscheme.in for a comprehensive list of all schemes
  */
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 let browser = null;
 let cachedMySchemes = null;
@@ -13,16 +13,29 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours cache
 
 async function initBrowser() {
     if (!browser) {
-        browser = await puppeteer.launch({
-            headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-images'
-            ]
-        });
+        try {
+            if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+                const chromium = require('@sparticuz/chromium');
+                browser = await puppeteer.launch({
+                    args: chromium.args,
+                    defaultViewport: chromium.defaultViewport,
+                    executablePath: await chromium.executablePath(),
+                    headless: chromium.headless,
+                    ignoreHTTPSErrors: true,
+                });
+                console.log('[Puppeteer] Launched on Vercel');
+            } else {
+                const localPuppeteer = require('puppeteer');
+                browser = await localPuppeteer.launch({
+                    headless: 'new',
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                });
+                console.log('[Puppeteer] Launched locally');
+            }
+        } catch (e) {
+            console.error('[Puppeteer] Launch failed:', e.message);
+            throw e;
+        }
     }
     return browser;
 }

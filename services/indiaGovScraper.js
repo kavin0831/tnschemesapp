@@ -1,21 +1,30 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 async function scrapeIndiaGov(targetState) {
     console.log(`[IndiaGov] Launching Browser to scrape for ${targetState}...`);
 
-    // Launch options
-    const browser = await puppeteer.launch({
-        headless: 'new',
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu'
-        ]
-    });
+    let browser;
+    try {
+        if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+            const chromium = require('@sparticuz/chromium');
+            browser = await puppeteer.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: chromium.headless,
+                ignoreHTTPSErrors: true,
+            });
+        } else {
+            const localPuppeteer = require('puppeteer');
+            browser = await localPuppeteer.launch({
+                headless: 'new',
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        }
+    } catch (e) {
+        console.error('[IndiaGov] Browser launch failed:', e.message);
+        return [];
+    }
 
     try {
         const page = await browser.newPage();
