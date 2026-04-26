@@ -103,25 +103,23 @@ const multiStateScraper = require('./multiStateScraper');
 
 async function getAllSchemes() {
     try {
-        console.log('Fetching TN schemes via Wikipedia (Reliable & Unblocked)...');
+        console.log('Fetching TN schemes via Python Stealth Proxy...');
+        const PYTHON_SCRAPE_URL = 'https://kavin08028292002-tnschemes.hf.space/scrape_tn';
         
-        // Using Wikipedia is much more reliable in production as gov portals block Vercel/HuggingFace
-        const schemes = await multiStateScraper.scrapeState('Tamil Nadu');
+        const response = await axios.get(PYTHON_SCRAPE_URL, { timeout: 45000 });
         
-        if (schemes && schemes.length > 0) {
-            console.log(`Successfully fetched ${schemes.length} TN schemes from Wikipedia.`);
-            return schemes;
+        if (response.data && response.data.success && response.data.schemes.length > 0) {
+            console.log(`Successfully fetched ${response.data.count} TN schemes via Python.`);
+            return response.data.schemes;
         } else {
-            console.log('Wikipedia returned no schemes, trying basic fallback...');
-            return [
-                { title: "Dr. Muthulakshmi Reddy Maternity Benefit Scheme", url: "https://en.wikipedia.org/wiki/Welfare_schemes_in_Tamil_Nadu", source: "Wiki", type: "Govt", state: "Tamil Nadu" },
-                { title: "Amma Unavagam (Mother's Canteen)", url: "https://en.wikipedia.org/wiki/Amma_Unavagam", source: "Wiki", type: "Govt", state: "Tamil Nadu" },
-                { title: "Chief Minister's Comprehensive Health Insurance Scheme", url: "https://en.wikipedia.org/wiki/Chief_Minister's_Comprehensive_Health_Insurance_Scheme", source: "Wiki", type: "Govt", state: "Tamil Nadu" }
-            ];
+            console.log('Python proxy failed or returned empty. Falling back to Wikipedia...');
+            const multiStateScraper = require('./multiStateScraper');
+            return await multiStateScraper.scrapeState('Tamil Nadu');
         }
     } catch (e) {
-        console.error('Error fetching TN schemes:', e.message);
-        return [];
+        console.error('Error fetching TN schemes via proxy:', e.message);
+        const multiStateScraper = require('./multiStateScraper');
+        return await multiStateScraper.scrapeState('Tamil Nadu');
     }
 }
 
